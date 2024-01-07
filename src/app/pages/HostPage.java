@@ -5,6 +5,7 @@ import app.user.Announcement;
 import app.user.Host;
 
 import java.util.List;
+import lombok.Getter;
 
 /**
  * The type Host page.
@@ -12,7 +13,8 @@ import java.util.List;
 public final class HostPage implements Page {
     private List<Podcast> podcasts;
     private List<Announcement> announcements;
-
+    @Getter
+    private String hostName;
     /**
      * Instantiates a new Host page.
      *
@@ -21,6 +23,7 @@ public final class HostPage implements Page {
     public HostPage(final Host host) {
         podcasts = host.getPodcasts();
         announcements = host.getAnnouncements();
+        hostName = host.getUsername();
     }
 
     @Override

@@ -1,5 +1,11 @@
 package app.user;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import lombok.Getter;
+
 /**
  * The type User abstract.
  */
@@ -7,7 +13,10 @@ public abstract class UserAbstract {
     private String username;
     private int age;
     private String city;
-
+    @Getter
+    private ArrayList<UserAbstract> observers = new ArrayList<>();
+    @Getter
+    private ArrayList<ObjectNode> notifications = new ArrayList<>();
     /**
      * Instantiates a new User abstract.
      *
@@ -81,4 +90,38 @@ public abstract class UserAbstract {
      * @return the string
      */
     public abstract String userType();
+
+    /**
+     * Method to subscribe another UserAbstract instance as an observer.
+     *
+     * @param observer the observer to be added
+     */
+    public void addObserver(UserAbstract observer) {
+        observers.add(observer);
+    }
+
+    /**
+     * Method to unsubscribe an observer.
+     *
+     * @param observer the observer to be removed
+     */
+    public void removeObserver(UserAbstract observer) {
+        observers.remove(observer);
+    }
+
+    /**
+     * Method to notify all observers of any state change.
+     */
+    void notifyObservers(String type) {
+        for (UserAbstract observer : observers) {
+            this.update(observer, type);
+        }
+    }
+
+    /**
+     * Abstract method to be implemented by concrete subclasses for handling updates.
+     *
+     * @param updatedUser the updated user
+     */
+    protected abstract void update(UserAbstract updatedUser, String type);
 }

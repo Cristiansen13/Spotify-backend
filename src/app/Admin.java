@@ -48,6 +48,7 @@ public final class Admin {
     @Getter
     private List<Podcast> podcasts = new ArrayList<>();
     private int timestamp = 0;
+    @Getter
     private final int limit = 5;
     private final int dateStringLength = 10;
     private final int dateFormatSize = 3;
@@ -392,11 +393,11 @@ public final class Admin {
         }
 
         songs.addAll(newSongs);
-        currentArtist.getAlbums().add(new Album(albumName,
-                                                commandInput.getDescription(),
-                                                username,
-                                                newSongs,
-                                                commandInput.getReleaseYear()));
+        currentArtist.addAlbum(new Album(albumName,
+                                         commandInput.getDescription(),
+                                         username,
+                                         newSongs,
+                                         commandInput.getReleaseYear()));
         return "%s has added new album successfully.".formatted(username);
     }
 
@@ -484,7 +485,7 @@ public final class Admin {
         }
 
         Podcast newPodcast = new Podcast(podcastName, username, episodes);
-        currentHost.getPodcasts().add(newPodcast);
+        currentHost.addPodcast(newPodcast);
         podcasts.add(newPodcast);
 
         return "%s has added new podcast successfully.".formatted(username);
@@ -553,7 +554,7 @@ public final class Admin {
             return "Event for %s does not have a valid date.".formatted(username);
         }
 
-        currentArtist.getEvents().add(new Event(eventName,
+        currentArtist.addEvent(new Event(eventName,
                                                 commandInput.getDescription(),
                                                 commandInput.getDate()));
         return "%s has added new event successfully.".formatted(username);
@@ -637,7 +638,7 @@ public final class Admin {
             return "Price for merchandise can not be negative.";
         }
 
-        currentArtist.getMerch().add(new Merchandise(commandInput.getName(),
+        currentArtist.addMerch(new Merchandise(commandInput.getName(),
                                                      commandInput.getDescription(),
                                                      commandInput.getPrice()));
         return "%s has added new merchandise successfully.".formatted(username);
@@ -668,7 +669,7 @@ public final class Admin {
             return "%s has already added an announcement with this name.";
         }
 
-        currentHost.getAnnouncements().add(new Announcement(announcementName,
+        currentHost.addAnnouncement(new Announcement(announcementName,
                                                             announcementDescription));
         return "%s has successfully added new announcement.".formatted(username);
     }

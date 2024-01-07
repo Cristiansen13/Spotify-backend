@@ -16,6 +16,8 @@ import app.player.PlayerStats;
 import app.searchBar.Filters;
 import app.searchBar.SearchBar;
 import app.utils.Enums;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
@@ -51,7 +53,8 @@ public final class User extends UserAbstract {
     @Getter
     @Setter
     private LikedContentPage likedContentPage;
-
+    @Getter
+    private ArrayList<String> boughtMerchandise = new ArrayList<>();
     /**
      * Instantiates a new User.
      *
@@ -433,7 +436,7 @@ public final class User extends UserAbstract {
         }
 
         playlists.add(new Playlist(name, getUsername(), timestamp));
-
+        notifyObservers("playlist");
         return "Playlist created successfully.";
     }
 
@@ -620,5 +623,20 @@ public final class User extends UserAbstract {
         }
 
         player.simulatePlayer(time);
+    }
+
+    /**
+     * Handle the update when a new playlist is created.
+     *
+     * @param updatedUser the updated user
+     */
+    @Override
+    protected void update(UserAbstract updatedUser, String type) {
+        if (type.equals("playlist")) {
+            ObjectNode objectNode = new ObjectMapper().createObjectNode();
+            objectNode.put("name", "New Playlist");
+            objectNode.put("description", "New Playlist from " + this.getUsername());
+            updatedUser.getNotifications().add(objectNode);
+        }
     }
 }

@@ -6,6 +6,7 @@ import app.audio.Files.Episode;
 import app.pages.HostPage;
 
 import app.player.ListenRecord;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -44,6 +45,11 @@ public final class Host extends ContentCreator {
         return podcasts;
     }
 
+    public void addPodcast(Podcast podcast) {
+        podcasts.add(podcast);
+        notifyObservers("podcast");
+    }
+
     /**
      * Sets podcasts.
      *
@@ -62,6 +68,10 @@ public final class Host extends ContentCreator {
         return announcements;
     }
 
+    public void addAnnouncement(Announcement announcement) {
+        announcements.add(announcement);
+        notifyObservers("announcement");
+    }
     /**
      * Sets announcements.
      *
@@ -119,5 +129,24 @@ public final class Host extends ContentCreator {
             }
         }
         return uniqueFans.size();
+    }
+    /**
+     * Handle the update when something new is added.
+     *
+     * @param updatedUser the updated user
+     */
+    @Override
+    protected void update(UserAbstract updatedUser, String type) {
+        if (type.equals("podcast")) {
+            ObjectNode objectNode = new ObjectMapper().createObjectNode();
+            objectNode.put("name", "New Podcast");
+            objectNode.put("description", "New Podcast from " + this.getUsername());
+            updatedUser.getNotifications().add(objectNode);
+        } else if (type.equals("announcement")) {
+            ObjectNode objectNode = new ObjectMapper().createObjectNode();
+            objectNode.put("name", "New Announcement");
+            objectNode.put("description", "New Announcement from " + this.getUsername());
+            updatedUser.getNotifications().add(objectNode);
+        }
     }
 }

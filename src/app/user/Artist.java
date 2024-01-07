@@ -3,6 +3,8 @@ package app.user;
 import app.Admin;
 import app.player.ListenRecord;
 import app.player.Player;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -56,6 +58,10 @@ public final class Artist extends ContentCreator {
         return albums;
     }
 
+    public void addAlbum(final Album album) {
+        albums.add(album);
+        notifyObservers("album");
+    }
     /**
      * Gets merch.
      *
@@ -65,6 +71,11 @@ public final class Artist extends ContentCreator {
         return merch;
     }
 
+    public void addMerch(final Merchandise merchItem) {
+        merch.add(merchItem);
+        notifyObservers("merch");
+    }
+
     /**
      * Gets events.
      *
@@ -72,6 +83,11 @@ public final class Artist extends ContentCreator {
      */
     public ArrayList<Event> getEvents() {
         return events;
+    }
+
+    public void addEvent(final Event event) {
+        events.add(event);
+        notifyObservers("event");
     }
 
     /**
@@ -177,4 +193,28 @@ public final class Artist extends ContentCreator {
         return uniqueFans.size();
     }
 
+    /**
+     * Handle the update when something new is added.
+     *
+     * @param updatedUser the updated user
+     */
+    @Override
+    protected void update(UserAbstract updatedUser, String type) {
+        if (type.equals("album")) {
+            ObjectNode objectNode = new ObjectMapper().createObjectNode();
+            objectNode.put("name", "New Album");
+            objectNode.put("description", "New Album from " + this.getUsername() + ".");
+            updatedUser.getNotifications().add(objectNode);
+        } else if (type.equals("merch")) {
+            ObjectNode objectNode = new ObjectMapper().createObjectNode();
+            objectNode.put("name", "New Merchandise");
+            objectNode.put("description", "New Merchandise from " + this.getUsername() + ".");
+            updatedUser.getNotifications().add(objectNode);
+        } else if (type.equals("event")) {
+            ObjectNode objectNode = new ObjectMapper().createObjectNode();
+            objectNode.put("name", "New Event");
+            objectNode.put("description", "New Event from " + this.getUsername() + ".");
+            updatedUser.getNotifications().add(objectNode);
+        }
+    }
 }

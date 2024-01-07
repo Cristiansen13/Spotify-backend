@@ -12,4 +12,8 @@ public class ArtistStats {
     private ArrayList<String> listenedSongs = new ArrayList<>();
     @Getter
     private Integer merchRevenue = 0;
+
+    public void addMerchRevenue(Integer revenue) {
+        merchRevenue += revenue;
+    }
 }

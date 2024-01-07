@@ -6,14 +6,18 @@ import app.user.Event;
 import app.user.Merchandise;
 
 import java.util.List;
+import lombok.Getter;
 
 /**
  * The type Artist page.
  */
 public final class ArtistPage implements Page {
     private List<Album> albums;
+    @Getter
     private List<Merchandise> merch;
     private List<Event> events;
+    @Getter
+    private String artistName;
 
     /**
      * Instantiates a new Artist page.
@@ -24,6 +28,7 @@ public final class ArtistPage implements Page {
         albums = artist.getAlbums();
         merch = artist.getMerch();
         events = artist.getEvents();
+        artistName = artist.getUsername();
     }
 
     @Override

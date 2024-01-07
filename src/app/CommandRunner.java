@@ -1,27 +1,27 @@
 package app;
 
+import app.audio.Collections.Album;
 import app.audio.Collections.AlbumOutput;
 import app.audio.Collections.PlaylistOutput;
 import app.audio.Collections.PodcastOutput;
+import app.pages.ArtistPage;
+import app.pages.HostPage;
 import app.player.PlayerStats;
 import app.searchBar.Filters;
 import app.user.Artist;
 import app.user.Host;
+import app.user.Merchandise;
 import app.user.User;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import fileio.input.CommandInput;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * The type Command runner.
@@ -32,7 +32,6 @@ public final class CommandRunner {
      */
     private static ObjectMapper objectMapper = new ObjectMapper();
     private static Admin admin;
-
     /**
      * Update admin.
      */
@@ -789,6 +788,12 @@ public final class CommandRunner {
 
         return objectNode;
     }
+
+    /**
+     * Gets 5 most frequent elements from an array of strings
+     * @param list the list to work with
+     * @return an object node with the most frequent strings and their frequency
+     */
     private static ObjectNode getTop5(final ArrayList<String> list) {
         ObjectNode objectNode = objectMapper.createObjectNode();
         Map<String, Integer> frequencyMap = new HashMap<>();
@@ -806,7 +811,7 @@ public final class CommandRunner {
             if (!seenElements.contains(element)) {
                 firstDistinctElements.add(element);
                 seenElements.add(element);
-                if (firstDistinctElements.size() == 5) {
+                if (firstDistinctElements.size() == admin.getLimit()) {
                     break;
                 }
             }
@@ -817,6 +822,12 @@ public final class CommandRunner {
         return objectNode;
     }
 
+    /**
+     *
+     * Creates wrap for a user
+     * @param commandInput the command input
+     * @return the object node
+     */
     public static ObjectNode wrapped(final CommandInput commandInput) {
         ObjectNode objectNode = objectMapper.createObjectNode();
         objectNode.put("command", commandInput.getCommand());
@@ -855,7 +866,6 @@ public final class CommandRunner {
                     user.getPlayer().getListenRecord().getListenedEpisodes());
                 results.put("topEpisodes", objectMapper.valueToTree(topEpisodes));
                 objectNode.put("result", objectMapper.valueToTree(results));
-                //artist.getAlbums();
             }
         } else if (artist != null) {
             if (getTop5(artist.getStats().getListenedAlbums()).isEmpty()
@@ -883,6 +893,10 @@ public final class CommandRunner {
         return objectNode;
     }
 
+    /**
+     * Runs at the end of the program to give a general stat about the artits
+     * @return an object node with the stat
+     */
     public static ObjectNode endProgram() {
         ObjectNode objectNode = objectMapper.createObjectNode();
         objectNode.put("command", "endProgram");
@@ -890,7 +904,7 @@ public final class CommandRunner {
         Admin admin = Admin.getInstance();
         ArrayList<Artist> listenedArtists = new ArrayList<>();
         for (Artist artist : admin.getArtists()) {
-            if (!artist.getStats().getListenedAlbums().isEmpty()) {
+            if (!artist.getStats().getListenedAlbums().isEmpty() || artist.getStats().getMerchRevenue() != 0) {
                 listenedArtists.add(artist);
             }
         }
@@ -926,6 +940,112 @@ public final class CommandRunner {
             verifiedArtists++;
         }
         objectNode.put("result", result);
+        return objectNode;
+    }
+
+    public static ObjectNode buyMerch(final CommandInput commandInput) {
+        ObjectNode objectNode = objectMapper.createObjectNode();
+        objectNode.put("command", commandInput.getCommand());
+        objectNode.put("user", commandInput.getUsername());
+        objectNode.put("timestamp", commandInput.getTimestamp());
+        User user = admin.getUser(commandInput.getUsername());
+        if (user != null) {
+            if (user.getCurrentPage().printCurrentPage().startsWith("Album")) {
+                ArtistPage artistPage = (ArtistPage) user.getCurrentPage();
+                String purchasedMerch = null;
+                Integer price = null;
+                for (Merchandise merchandise : artistPage.getMerch()) {
+                    if (merchandise.getName().equals(commandInput.getName())) {
+                        purchasedMerch = merchandise.getName();
+                        price = merchandise.getPrice();
+                    }
+                }
+                if (purchasedMerch != null) {
+                    user.getBoughtMerchandise().add(purchasedMerch);
+                    for (Artist artist : admin.getArtists()) {
+                        for (Merchandise merchandise : artist.getMerch()) {
+                            if (merchandise.getName().equals(purchasedMerch)) {
+                                artist.getStats().addMerchRevenue(price);
+                            }
+                        }
+                    }
+                    objectNode.put("message", commandInput.getUsername() + " has added new merch successfully.");
+                } else {
+                    objectNode.put("message", "The merch " + commandInput.getName() + " doesn't exist.");
+                }
+            } else {
+                objectNode.put("message", "Cannot buy merch from this page.");
+            }
+        } else {
+            objectNode.put("message","The username " + commandInput.getUsername() + " doesn't exist.");
+        }
+        return objectNode;
+    }
+
+    public static ObjectNode seeMerch(final CommandInput commandInput) {
+        ObjectNode objectNode = objectMapper.createObjectNode();
+        objectNode.put("command", commandInput.getCommand());
+        objectNode.put("user", commandInput.getUsername());
+        objectNode.put("timestamp", commandInput.getTimestamp());
+        User user = admin.getUser(commandInput.getUsername());
+        if (user != null) {
+            objectNode.put("result", objectMapper.valueToTree(user.getBoughtMerchandise()));
+        }
+        return objectNode;
+    }
+
+    public static ObjectNode subscribe(final CommandInput commandInput) {
+        ObjectNode objectNode = objectMapper.createObjectNode();
+        objectNode.put("command", commandInput.getCommand());
+        objectNode.put("user", commandInput.getUsername());
+        objectNode.put("timestamp", commandInput.getTimestamp());
+        User user = admin.getUser(commandInput.getUsername());
+        if (user != null) {
+            if (user.getCurrentPage().printCurrentPage().startsWith("Album")) {
+                ArtistPage artistPage = (ArtistPage) user.getCurrentPage();
+                for (Artist artist : admin.getArtists()) {
+                    if (artist.getUsername().equals(artistPage.getArtistName())) {
+                        if (artist.getObservers().contains(user)) {
+                            artist.removeObserver(user);
+                            objectNode.put("message", commandInput.getUsername() + " unsubscribed from " + artist.getUsername() + " successfully.");
+                        } else {
+                            artist.addObserver(user);
+                            objectNode.put("message", commandInput.getUsername() + " subscribed to " + artist.getUsername() + " successfully.");
+                        }
+                        break;
+                    }
+                }
+            } else if (user.getCurrentPage().printCurrentPage().startsWith("Podcast")) {
+                HostPage hostPage = (HostPage) user.getCurrentPage();
+                for (Host host : admin.getHosts()) {
+                    if (host.getUsername().equals(hostPage.getHostName())) {
+                        if (host.getObservers().contains(user)) {
+                            host.removeObserver(user);
+                            objectNode.put("message", commandInput.getUsername() + " unsubscribed from " + host.getUsername() + " successfully.");
+                        } else {
+                            host.addObserver(user);
+                            objectNode.put("message", commandInput.getUsername() + " subscribed to " + host.getUsername() + " successfully.");
+                        }
+                        break;
+                    }
+                }
+            } else {
+                objectNode.put("message", "To subscribe you need to be on the page of an artist or host.");
+            }
+        } else {
+            objectNode.put("message","The username " + commandInput.getUsername() + " doesn't exist.");
+        }
+        return objectNode;
+    }
+
+    public static ObjectNode getNotifications(final CommandInput commandInput) {
+        ObjectNode objectNode = objectMapper.createObjectNode();
+        objectNode.put("command", commandInput.getCommand());
+        objectNode.put("user", commandInput.getUsername());
+        objectNode.put("timestamp", commandInput.getTimestamp());
+        User user = admin.getUser(commandInput.getUsername());
+        objectNode.put("notifications", objectMapper.valueToTree(user.getNotifications()));
+        user.getNotifications().clear();
         return objectNode;
     }
 }

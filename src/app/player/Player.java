@@ -5,12 +5,10 @@ import app.audio.Collections.Album;
 import app.audio.Collections.AudioCollection;
 import app.audio.Collections.Podcast;
 import app.audio.Files.AudioFile;
-import app.audio.Files.Episode;
 import app.audio.Files.Song;
 import app.audio.LibraryEntry;
 import app.user.Artist;
 import app.user.Host;
-import app.utils.Enums;
 import app.utils.Enums.PlayerSourceType;
 import app.utils.Enums.RepeatMode;
 import lombok.Getter;
@@ -191,7 +189,10 @@ public final class Player {
             }
             if (!paused) {
                 if (!(elapsedTime == 0 && !listenRecord.getListenedSongs().isEmpty()
-                    && source.getAudioCollection() != null && !listenRecord.getListenedSongs().get(listenRecord.getListenedSongs().size() - 1).equals(source.getAudioFile().getName()))) {
+                    && source.getAudioCollection() != null
+                    && !listenRecord.getListenedSongs()
+                    .get(listenRecord.getListenedSongs().size() - 1).equals(source.getAudioFile()
+                        .getName()))) {
                     addToRecord();
                 }
                 source.skip(-elapsedTime);
