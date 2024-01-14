@@ -1,7 +1,55 @@
 package main;
 
 import app.Admin;
-import app.CommandRunner;
+import app.Command.ArtistCommands.AddAlbumCommand;
+import app.Command.HostCommands.AddAnnouncementCommand;
+import app.Command.ArtistCommands.AddEventCommand;
+import app.Command.ArtistCommands.AddMerchCommand;
+import app.Command.HostCommands.AddPodcastCommand;
+import app.Command.UserCommands.UpdateRecommendationsCommand;
+import app.Command.UserCommands.AddRemoveInPlaylistCommand;
+import app.Command.UserCommands.AddUserCommand;
+import app.Command.PlayerCommands.BackwardCommand;
+import app.Command.UserCommands.BuyMerchCommand;
+import app.Command.UserCommands.ChangePageCommand;
+import app.Command.Command;
+import app.Command.UserCommands.CreatePlaylistCommand;
+import app.Command.UserCommands.DeleteUserCommand;
+import app.Command.EndProgramCommand;
+import app.Command.UserCommands.FollowCommand;
+import app.Command.PlayerCommands.ForwardCommand;
+import app.Command.UserCommands.GetAllUsersCommand;
+import app.Command.UserCommands.GetNotificationsCommand;
+import app.Command.UserCommands.GetOnlineUsersCommand;
+import app.Command.UserCommands.GetPreferredGenreCommand;
+import app.Command.StatsCommands.GetTop5AlbumListCommand;
+import app.Command.StatsCommands.GetTop5ArtistListCommand;
+import app.Command.StatsCommands.GetTop5PlaylistCommand;
+import app.Command.StatsCommands.GetTop5SongsCommand;
+import app.Command.UserCommands.LikeCommand;
+import app.Command.PlayerCommands.LoadCommand;
+import app.Command.PlayerCommands.NextCommand;
+import app.Command.PlayerCommands.PlayPauseCommand;
+import app.Command.PlayerCommands.PrevCommand;
+import app.Command.UserCommands.PrintCurrentPage;
+import app.Command.ArtistCommands.RemoveAlbumCommand;
+import app.Command.HostCommands.RemoveAnnouncementCommand;
+import app.Command.ArtistCommands.RemoveEventCommand;
+import app.Command.HostCommands.RemovePodcastCommand;
+import app.Command.PlayerCommands.RepeatCommand;
+import app.Command.PlayerCommands.SearchCommand;
+import app.Command.UserCommands.SeeMerchCommand;
+import app.Command.PlayerCommands.SelectCommand;
+import app.Command.StatsCommands.ShowAlbumsCommand;
+import app.Command.StatsCommands.ShowLikedSongsCommand;
+import app.Command.StatsCommands.ShowPlaylistsCommand;
+import app.Command.StatsCommands.ShowPodcastsCommand;
+import app.Command.PlayerCommands.ShuffleCommand;
+import app.Command.UserCommands.StatusCommand;
+import app.Command.UserCommands.SubscribeCommand;
+import app.Command.UserCommands.SwitchConnectionStatusCommand;
+import app.Command.UserCommands.SwitchVisibilityCommand;
+import app.Command.StatsCommands.WrappedCommand;
 import app.searchBar.SearchBar;
 import checker.Checker;
 import checker.CheckerConstants;
@@ -69,14 +117,14 @@ public final class Main {
      * @throws IOException in case of exceptions to reading / writing
      */
     public static void action(final String filePath1,
-                              final String filePath2) throws IOException {
+        final String filePath2) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         LibraryInput library = objectMapper.readValue(new File(CheckerConstants.TESTS_PATH
-                                                               + "library/library.json"),
-                                                               LibraryInput.class);
+                + "library/library.json"),
+            LibraryInput.class);
         CommandInput[] commands = objectMapper.readValue(new File(CheckerConstants.TESTS_PATH
-                                                                  + filePath1),
-                                                                  CommandInput[].class);
+                + filePath1),
+            CommandInput[].class);
         ArrayNode outputs = objectMapper.createArrayNode();
 
         Admin admin = Admin.getInstance();
@@ -84,67 +132,168 @@ public final class Main {
         admin.setUsers(library.getUsers());
         admin.setSongs(library.getSongs());
         admin.setPodcasts(library.getPodcasts());
-        CommandRunner.updateAdmin();
         System.out.println("----------------------------------------");
         for (CommandInput command : commands) {
             admin.updateTimestamp(command.getTimestamp());
 
             String commandName = command.getCommand();
-
+            Command commandObject = null;
             switch (commandName) {
-                case "search" -> outputs.add(CommandRunner.search(command));
-                case "select" -> outputs.add(CommandRunner.select(command));
-                case "load" -> outputs.add(CommandRunner.load(command));
-                case "playPause" -> outputs.add(CommandRunner.playPause(command));
-                case "repeat" -> outputs.add(CommandRunner.repeat(command));
-                case "shuffle" -> outputs.add(CommandRunner.shuffle(command));
-                case "forward" -> outputs.add(CommandRunner.forward(command));
-                case "backward" -> outputs.add(CommandRunner.backward(command));
-                case "like" -> outputs.add(CommandRunner.like(command));
-                case "next" -> outputs.add(CommandRunner.next(command));
-                case "prev" -> outputs.add(CommandRunner.prev(command));
-                case "createPlaylist" -> outputs.add(CommandRunner.createPlaylist(command));
-                case "addRemoveInPlaylist" -> outputs.add(CommandRunner
-                                                     .addRemoveInPlaylist(command));
-                case "switchVisibility" -> outputs.add(CommandRunner.switchVisibility(command));
-                case "showPlaylists" -> outputs.add(CommandRunner.showPlaylists(command));
-                case "follow" -> outputs.add(CommandRunner.follow(command));
-                case "status" -> outputs.add(CommandRunner.status(command));
-                case "showPreferredSongs" -> outputs.add(CommandRunner.showLikedSongs(command));
-                case "getPreferredGenre" -> outputs.add(CommandRunner.getPreferredGenre(command));
-                case "getTop5Songs" -> outputs.add(CommandRunner.getTop5Songs(command));
-                case "getTop5Playlists" -> outputs.add(CommandRunner.getTop5Playlists(command));
-                case "switchConnectionStatus" -> outputs.add(CommandRunner
-                                                        .switchConnectionStatus(command));
-                case "addUser" -> outputs.add(CommandRunner.addUser(command));
-                case "deleteUser" -> outputs.add(CommandRunner.deleteUser(command));
-                case "addPodcast" -> outputs.add(CommandRunner.addPodcast(command));
-                case "removePodcast" -> outputs.add(CommandRunner.removePodcast(command));
-                case "addAnnouncement" -> outputs.add(CommandRunner.addAnnouncement(command));
-                case "removeAnnouncement" -> outputs.add(CommandRunner
-                                                    .removeAnnouncement(command));
-                case "addAlbum" -> outputs.add(CommandRunner.addAlbum(command));
-                case "removeAlbum" -> outputs.add(CommandRunner.removeAlbum(command));
-                case "addEvent" -> outputs.add(CommandRunner.addEvent(command));
-                case "removeEvent" -> outputs.add(CommandRunner.removeEvent(command));
-                case "addMerch" -> outputs.add(CommandRunner.addMerch(command));
-                case "changePage" -> outputs.add(CommandRunner.changePage(command));
-                case "printCurrentPage" -> outputs.add(CommandRunner.printCurrentPage(command));
-                case "getTop5Albums" -> outputs.add(CommandRunner.getTop5AlbumList(command));
-                case "getTop5Artists" -> outputs.add(CommandRunner.getTop5ArtistList(command));
-                case "getAllUsers" -> outputs.add(CommandRunner.getAllUsers(command));
-                case "getOnlineUsers" -> outputs.add(CommandRunner.getOnlineUsers(command));
-                case "showAlbums" -> outputs.add(CommandRunner.showAlbums(command));
-                case "showPodcasts" -> outputs.add(CommandRunner.showPodcasts(command));
-                case "wrapped" -> outputs.add(CommandRunner.wrapped(command));
-                case "buyMerch" -> outputs.add(CommandRunner.buyMerch(command));
-                case "seeMerch" -> outputs.add(CommandRunner.seeMerch(command));
-                case "subscribe" -> outputs.add(CommandRunner.subscribe(command));
-                case "getNotifications" -> outputs.add(CommandRunner.getNotifications(command));
+                case "search" -> {
+                    commandObject = new SearchCommand(admin, command); }
+                case "select" -> {
+                    commandObject = new SelectCommand(admin, command);
+                }
+                case "load" -> {
+                    commandObject = new LoadCommand(admin, command);
+                }
+                case "playPause" -> {
+                    commandObject = new PlayPauseCommand(admin, command);
+                }
+                case "repeat" -> {
+                    commandObject = new RepeatCommand(admin, command);
+                }
+                case "shuffle" -> {
+                    commandObject = new ShuffleCommand(admin, command);
+                }
+                case "forward" -> {
+                    commandObject = new ForwardCommand(admin, command);
+                }
+                case "backward" -> {
+                    commandObject = new BackwardCommand(admin, command);
+                }
+                case "like" -> {
+                    commandObject = new LikeCommand(admin, command);
+                }
+                case "next" -> {
+                    commandObject = new NextCommand(admin, command);
+                }
+                case "prev" -> {
+                    commandObject = new PrevCommand(admin, command);
+                }
+                case "createPlaylist" -> {
+                    commandObject = new CreatePlaylistCommand(admin,
+                        command);
+                }
+                case "addRemoveInPlaylist" -> {
+                    commandObject = new AddRemoveInPlaylistCommand(admin,
+                        command);
+                }
+                case "switchVisibility" -> {
+                    commandObject = new SwitchVisibilityCommand(admin,
+                        command);
+                }
+                case "showPlaylists" -> {
+                    commandObject = new ShowPlaylistsCommand(admin, command);
+                }
+                case "follow" -> {
+                    commandObject = new FollowCommand(admin, command);
+                }
+                case "status" -> {
+                    commandObject = new StatusCommand(admin, command);
+                }
+                case "showPreferredSongs" -> {
+                    commandObject = new ShowLikedSongsCommand(admin,
+                        command);
+                }
+                case "getPreferredGenre" -> {
+                    commandObject = new GetPreferredGenreCommand(admin,
+                        command);
+                }
+                case "getTop5Songs" -> {
+                    commandObject = new GetTop5SongsCommand(admin,
+                        command);
+                }
+                case "getTop5Playlists" -> {
+                    commandObject = new GetTop5PlaylistCommand(admin,
+                        command);
+                }
+                case "switchConnectionStatus" -> {
+                    commandObject = new SwitchConnectionStatusCommand(admin,
+                        command);
+                }
+                case "addUser" -> {
+                    commandObject = new AddUserCommand(admin, command);
+                }
+                case "deleteUser" -> {
+                    commandObject = new DeleteUserCommand(admin, command);
+                }
+                case "addPodcast" -> {
+                    commandObject = new AddPodcastCommand(admin, command);
+                }
+                case "removePodcast" -> {
+                    commandObject = new RemovePodcastCommand(admin, command);
+                }
+                case "addAnnouncement" -> {
+                    commandObject = new AddAnnouncementCommand(admin, command);
+                }
+                case "removeAnnouncement" -> {
+                    commandObject = new RemoveAnnouncementCommand(admin, command);
+                }
+                case "addAlbum" -> {
+                    commandObject = new AddAlbumCommand(admin, command);
+                }
+                case "removeAlbum" -> {
+                    commandObject = new RemoveAlbumCommand(admin, command);
+                }
+                case "addEvent" -> {
+                    commandObject = new AddEventCommand(admin, command);
+                }
+                case "removeEvent" -> {
+                    commandObject = new RemoveEventCommand(admin, command);
+                }
+                case "addMerch" -> {
+                    commandObject = new AddMerchCommand(admin, command);
+                }
+                case "changePage" -> {
+                    commandObject = new ChangePageCommand(admin, command);
+                }
+                case "printCurrentPage" -> {
+                    commandObject = new PrintCurrentPage(admin, command);
+                }
+                case "getTop5Albums" -> {
+                    commandObject = new GetTop5AlbumListCommand(admin, command);
+                }
+                case "getTop5Artists" -> {
+                    commandObject = new GetTop5ArtistListCommand(admin, command);
+                }
+                case "getAllUsers" -> {
+                    commandObject = new GetAllUsersCommand(admin, command);
+                }
+                case "getOnlineUsers" -> {
+                    commandObject = new GetOnlineUsersCommand(admin, command);
+                }
+                case "showAlbums" -> {
+                    commandObject = new ShowAlbumsCommand(admin, command);
+                }
+                case "showPodcasts" -> {
+                    commandObject = new ShowPodcastsCommand(admin, command);
+                }
+                case "wrapped" -> {
+                    commandObject = new WrappedCommand(admin, command);
+                }
+                case "buyMerch" -> {
+                    commandObject = new BuyMerchCommand(admin, command);
+                }
+                case "seeMerch" -> {
+                    commandObject = new SeeMerchCommand(admin, command);
+                }
+                case "subscribe" -> {
+                    commandObject = new SubscribeCommand(admin, command);
+                }
+                case "getNotifications" ->
+                    commandObject = new GetNotificationsCommand(admin, command);
+                case "updateRecommendations" -> {
+                    commandObject = new UpdateRecommendationsCommand(admin, command);
+                }
                 default -> System.out.println("Invalid command " + commandName);
             }
+            if (commandObject != null) {
+                outputs.add(commandObject.execute());
+            }
         }
-        outputs.add(CommandRunner.endProgram());
+        Command EndProgram = new EndProgramCommand(admin);
+        outputs.add(EndProgram.execute());
         ObjectWriter objectWriter = objectMapper.writerWithDefaultPrettyPrinter();
         objectWriter.writeValue(new File(filePath2), outputs);
 

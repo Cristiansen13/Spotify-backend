@@ -6,6 +6,7 @@ import app.user.User;
 
 import java.util.Comparator;
 import java.util.List;
+import lombok.Setter;
 
 /**
  * The type Home page.
@@ -13,6 +14,8 @@ import java.util.List;
 public final class HomePage implements Page {
     private List<Song> likedSongs;
     private List<Playlist> followedPlaylists;
+    @Setter
+    private String recommendedSong;
     private final int limit = 5;
 
     /**
@@ -27,7 +30,7 @@ public final class HomePage implements Page {
 
     @Override
     public String printCurrentPage() {
-        return "Liked songs:\n\t%s\n\nFollowed playlists:\n\t%s"
+        String result = "Liked songs:\n\t%s\n\nFollowed playlists:\n\t%s"
                .formatted(likedSongs.stream()
                                     .sorted(Comparator.comparing(Song::getLikes)
                                     .reversed()).limit(limit).map(Song::getName)
@@ -38,5 +41,8 @@ public final class HomePage implements Page {
                                   - o1.getSongs().stream().map(Song::getLikes).reduce(Integer::sum)
                                   .orElse(0)).limit(limit).map(Playlist::getName)
                           .toList());
+        if (recommendedSong != null)
+            result += "\n\nRecommended song:\n\t%s".formatted(recommendedSong);
+        return result;
     }
 }

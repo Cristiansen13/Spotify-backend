@@ -18,10 +18,6 @@ import app.searchBar.SearchBar;
 import app.utils.Enums;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -95,23 +91,36 @@ public final class User extends UserAbstract {
             Admin admin = Admin.getInstance();
             boolean isSong = false;
             for (Song song : admin.getSongs()) {
-                if (song.getName().equals(player.getSource().getAudioFile().getName()) && song.getAlbum().equals(((Song) player.getSource().getAudioFile()).getAlbum())) {
+                if (song.getName().equals(player.getSource().getAudioFile()
+                    .getName()) && song.getAlbum().equals(((Song) player
+                    .getSource().getAudioFile()).getAlbum())) {
                     isSong = true;
                     break;
                 }
             }
-            if (isSong && (player.getListenRecord().getListenedSongs().isEmpty() || !player.getSource().getAudioFile().getName().equals(player.getListenRecord().getListenedSongs().get(player.getListenRecord().getListenedSongs().size() - 1)))) {
-                player.getListenRecord().getListenedSongs().add(player.getSource().getAudioFile().getName());
-                player.getListenRecord().getListenedArtists().add(((Song) player.getSource().getAudioFile()).getArtist());
-                player.getListenRecord().getListenedGenres().add(((Song) player.getSource().getAudioFile()).getGenre());
-                player.getListenRecord().getListenedAlbums().add(((Song) player.getSource().getAudioFile()).getAlbum());
+            if (isSong && (player.getListenRecord().getListenedSongs().isEmpty()
+                || !player.getSource().getAudioFile().getName().equals(player
+                .getListenRecord().getListenedSongs().get(player.getListenRecord()
+                    .getListenedSongs().size() - 1)))) {
+                player.getListenRecord().getListenedSongs().add(player.getSource()
+                    .getAudioFile().getName());
+                player.getListenRecord().getListenedArtists().add(((Song) player
+                    .getSource().getAudioFile()).getArtist());
+                player.getListenRecord().getListenedGenres().add(((Song) player
+                    .getSource().getAudioFile()).getGenre());
+                player.getListenRecord().getListenedAlbums().add(((Song) player
+                    .getSource().getAudioFile()).getAlbum());
                 for (Artist artist : admin.getArtists()) {
-                    if (artist.getUsername().equals(((Song) player.getSource().getAudioFile()).getArtist())) {
+                    if (artist.getUsername().equals(((Song) player.getSource()
+                        .getAudioFile()).getArtist())) {
                         for (Album album : artist.getAlbums()) {
-                            if (album.getName().equals(((Song) player.getSource().getAudioFile()).getAlbum())) {
+                            if (album.getName().equals(((Song) player.getSource()
+                                .getAudioFile()).getAlbum())) {
                                 artist.getStats().getListenedAlbums()
-                                    .add(((Song) player.getSource().getAudioFile()).getAlbum());
-                                artist.getStats().getListenedSongs().add(player.getSource().getAudioFile().getName());
+                                    .add(((Song) player.getSource().getAudioFile())
+                                        .getAlbum());
+                                artist.getStats().getListenedSongs().add(player
+                                    .getSource().getAudioFile().getName());
                             }
                         }
                     }
@@ -631,12 +640,16 @@ public final class User extends UserAbstract {
      * @param updatedUser the updated user
      */
     @Override
-    protected void update(UserAbstract updatedUser, String type) {
+    protected void update(final UserAbstract updatedUser, final String type) {
         if (type.equals("playlist")) {
             ObjectNode objectNode = new ObjectMapper().createObjectNode();
             objectNode.put("name", "New Playlist");
             objectNode.put("description", "New Playlist from " + this.getUsername());
             updatedUser.getNotifications().add(objectNode);
         }
+    }
+
+    public void updateRecommendationsSong() {
+        this.homePage.setRecommendedSong(this.player.getCurrentAudioFile().getName());
     }
 }

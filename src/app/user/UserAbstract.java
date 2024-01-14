@@ -2,8 +2,6 @@ package app.user;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 import lombok.Getter;
 
 /**
@@ -96,7 +94,7 @@ public abstract class UserAbstract {
      *
      * @param observer the observer to be added
      */
-    public void addObserver(UserAbstract observer) {
+    public void addObserver(final UserAbstract observer) {
         observers.add(observer);
     }
 
@@ -105,14 +103,14 @@ public abstract class UserAbstract {
      *
      * @param observer the observer to be removed
      */
-    public void removeObserver(UserAbstract observer) {
+    public void removeObserver(final UserAbstract observer) {
         observers.remove(observer);
     }
 
     /**
      * Method to notify all observers of any state change.
      */
-    void notifyObservers(String type) {
+    void notifyObservers(final String type) {
         for (UserAbstract observer : observers) {
             this.update(observer, type);
         }

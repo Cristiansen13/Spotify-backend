@@ -204,35 +204,45 @@ public final class Player {
         Integer total = null;
         Admin admin = Admin.getInstance();
         for (Song song : admin.getSongs()) {
-            if (song.getName().equals(source.getAudioFile().getName()) && song.getAlbum().equals(((Song) source.getAudioFile()).getAlbum())) {
+            if (song.getName().equals(source.getAudioFile().getName())
+                && song.getAlbum().equals(((Song) source.getAudioFile()).getAlbum())) {
                 total = song.getDuration();
                 break;
             }
         }
         if (total == null) {
             if (listenRecord.getListenedEpisodes().isEmpty()
-                || !listenRecord.getListenedEpisodes().get(listenRecord.getListenedEpisodes().size() - 1).equals(source.getAudioFile().getName())) {
+                || !listenRecord.getListenedEpisodes()
+                .get(listenRecord.getListenedEpisodes().size() - 1)
+                .equals(source.getAudioFile().getName())) {
                 listenRecord.getListenedEpisodes().add(source.getAudioFile().getName());
                 for (Host host : admin.getHosts()) {
                     Podcast podcast = (Podcast) source.getAudioCollection();
                     if (podcast.getOwner().equals(host.getUsername())) {
                         host.getListenedEpisodes().add(source.getAudioFile().getName());
-                        listenRecord.getListenedHosts().add(source.getAudioCollection().getOwner());
+                        listenRecord.getListenedHosts().add(source
+                            .getAudioCollection().getOwner());
                     }
                 }
             }
         } else if (total == source.getDuration()) {
             listenRecord.getListenedSongs().add(source.getAudioFile().getName());
-            listenRecord.getListenedArtists().add(((Song) source.getAudioFile()).getArtist());
-            listenRecord.getListenedGenres().add(((Song) source.getAudioFile()).getGenre());
-            listenRecord.getListenedAlbums().add(((Song) source.getAudioFile()).getAlbum());
+            listenRecord.getListenedArtists().add(((Song) source.getAudioFile())
+                .getArtist());
+            listenRecord.getListenedGenres().add(((Song) source.getAudioFile())
+                .getGenre());
+            listenRecord.getListenedAlbums().add(((Song) source.getAudioFile())
+                .getAlbum());
             for (Artist artist : admin.getArtists()) {
-                if (artist.getUsername().equals(((Song) source.getAudioFile()).getArtist())) {
+                if (artist.getUsername().equals(((Song) source.getAudioFile())
+                    .getArtist())) {
                     for (Album album : artist.getAlbums()) {
-                        if (album.getName().equals(((Song) source.getAudioFile()).getAlbum())) {
+                        if (album.getName().equals(((Song) source.getAudioFile())
+                            .getAlbum())) {
                             artist.getStats().getListenedAlbums()
                                 .add(((Song) source.getAudioFile()).getAlbum());
-                            artist.getStats().getListenedSongs().add(source.getAudioFile().getName());
+                            artist.getStats().getListenedSongs().add(source
+                                .getAudioFile().getName());
                         }
                     }
                 }

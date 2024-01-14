@@ -2,10 +2,8 @@ package app.user;
 
 import app.Admin;
 import app.audio.Collections.Podcast;
-import app.audio.Files.Episode;
 import app.pages.HostPage;
 
-import app.player.ListenRecord;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.ArrayList;
@@ -45,7 +43,12 @@ public final class Host extends ContentCreator {
         return podcasts;
     }
 
-    public void addPodcast(Podcast podcast) {
+    /**
+     * Add podcast.
+     *
+     * @param podcast the podcast
+     */
+    public void addPodcast(final Podcast podcast) {
         podcasts.add(podcast);
         notifyObservers("podcast");
     }
@@ -68,7 +71,12 @@ public final class Host extends ContentCreator {
         return announcements;
     }
 
-    public void addAnnouncement(Announcement announcement) {
+    /**
+     * Add announcement.
+     *
+     * @param announcement the announcement
+     */
+    public void addAnnouncement(final Announcement announcement) {
         announcements.add(announcement);
         notifyObservers("announcement");
     }
@@ -113,11 +121,21 @@ public final class Host extends ContentCreator {
         return null;
     }
 
+    /**
+     * Gets user type.
+     *
+     * @return the user type
+     */
     @Override
     public String userType() {
         return "host";
     }
 
+    /**
+     * Gets numberof listeners.
+     *
+     * @return the numberof listeners
+     */
     public Integer getNumberofListeners() {
         Set<String> uniqueFans = new HashSet<>();
         Admin admin = Admin.getInstance();
@@ -136,7 +154,7 @@ public final class Host extends ContentCreator {
      * @param updatedUser the updated user
      */
     @Override
-    protected void update(UserAbstract updatedUser, String type) {
+    protected void update(final UserAbstract updatedUser, final String type) {
         if (type.equals("podcast")) {
             ObjectNode objectNode = new ObjectMapper().createObjectNode();
             objectNode.put("name", "New Podcast");

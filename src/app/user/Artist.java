@@ -2,7 +2,6 @@ package app.user;
 
 import app.Admin;
 import app.player.ListenRecord;
-import app.player.Player;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.ArrayList;
@@ -16,7 +15,6 @@ import app.audio.Files.Song;
 import app.pages.ArtistPage;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.Setter;
@@ -32,7 +30,7 @@ public final class Artist extends ContentCreator {
     private ArtistStats stats = new ArtistStats();
     @Getter
     @Setter
-    boolean isVerified = false;
+    private boolean isVerified = false;
     /**
      * Instantiates a new Artist.
      *
@@ -58,6 +56,11 @@ public final class Artist extends ContentCreator {
         return albums;
     }
 
+    /**
+     * Add album.
+     *
+     * @param album the album to be added.
+     */
     public void addAlbum(final Album album) {
         albums.add(album);
         notifyObservers("album");
@@ -71,6 +74,11 @@ public final class Artist extends ContentCreator {
         return merch;
     }
 
+    /**
+     * Add merch.
+     *
+     * @param merchItem the merch item to be added.
+     */
     public void addMerch(final Merchandise merchItem) {
         merch.add(merchItem);
         notifyObservers("merch");
@@ -85,6 +93,11 @@ public final class Artist extends ContentCreator {
         return events;
     }
 
+    /**
+     * Add event.
+     *
+     * @param event the event to be added.
+     */
     public void addEvent(final Event event) {
         events.add(event);
         notifyObservers("event");
@@ -157,6 +170,11 @@ public final class Artist extends ContentCreator {
         return "artist";
     }
 
+    /**
+     * Gets top fans.
+     *
+     * @return the top fans
+     */
     public List<String> topFans() {
         Map<String, Long> fanOccurrences = new HashMap<>();
         Admin admin = Admin.getInstance();
@@ -171,13 +189,17 @@ public final class Artist extends ContentCreator {
         List<String> topFans = fanOccurrences.entrySet().stream()
             .sorted(Map.Entry.<String, Long>comparingByValue().reversed()
                 .thenComparing(Map.Entry.comparingByKey()))
-            .limit(5)
+            .limit(Admin.getInstance().getLimit())
             .map(Map.Entry::getKey)
             .collect(Collectors.toList());
         return topFans;
     }
 
-
+    /**
+     * Gets number of listeners.
+     *
+     * @return the number of listeners
+     */
     public Integer getNumberOfListeners() {
         Set<String> uniqueFans = new HashSet<>();
         Admin admin = Admin.getInstance();
@@ -199,7 +221,7 @@ public final class Artist extends ContentCreator {
      * @param updatedUser the updated user
      */
     @Override
-    protected void update(UserAbstract updatedUser, String type) {
+    protected void update(final UserAbstract updatedUser, final String type) {
         if (type.equals("album")) {
             ObjectNode objectNode = new ObjectMapper().createObjectNode();
             objectNode.put("name", "New Album");
