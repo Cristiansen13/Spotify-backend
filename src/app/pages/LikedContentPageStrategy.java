@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * The type Liked content page.
  */
-public final class LikedContentPage implements Page {
+public final class LikedContentPageStrategy implements PageStrategy {
     /**
      * The Liked songs.
      */
@@ -24,7 +24,7 @@ public final class LikedContentPage implements Page {
      *
      * @param user the user
      */
-    public LikedContentPage(final User user) {
+    public LikedContentPageStrategy(final User user) {
         likedSongs = user.getLikedSongs();
         followedPlaylists = user.getFollowedPlaylists();
     }

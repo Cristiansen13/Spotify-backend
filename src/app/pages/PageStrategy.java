@@ -3,7 +3,7 @@ package app.pages;
 /**
  * The interface Page.
  */
-public interface Page {
+public interface PageStrategy {
     /**
      * Print current page string.
      *

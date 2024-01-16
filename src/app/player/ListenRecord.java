@@ -1,5 +1,6 @@
 package app.player;
 
+import app.audio.Files.Song;
 import java.util.ArrayList;
 import lombok.Getter;
 
@@ -16,4 +17,6 @@ public class ListenRecord {
     private ArrayList<String> listenedEpisodes = new ArrayList<>();
     @Getter
     private ArrayList<String> listenedHosts = new ArrayList<>();
+    @Getter
+    private ArrayList<Song> premiumListenedSongs = new ArrayList<>();
 }

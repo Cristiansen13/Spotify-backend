@@ -1,5 +1,6 @@
 package app.audio.Files;
 
+import java.util.Comparator;
 import lombok.Getter;
 
 import java.util.ArrayList;
@@ -18,7 +19,9 @@ public final class Song extends AudioFile {
     private final Integer releaseYear;
     private final String artist;
     private Integer likes;
-
+    @Getter
+    private static Comparator<Song> likesComparator =
+        Comparator.comparingInt(Song::getLikes).reversed();
     /**
      * Instantiates a new Song.
      *

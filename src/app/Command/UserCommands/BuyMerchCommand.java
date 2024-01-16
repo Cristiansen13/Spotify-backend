@@ -1,7 +1,7 @@
 package app.Command.UserCommands;
 import app.Admin;
 import app.Command.Command;
-import app.pages.ArtistPage;
+import app.pages.ArtistPageStrategy;
 import app.user.Artist;
 import app.user.Merchandise;
 import app.user.User;
@@ -12,7 +12,7 @@ import fileio.input.CommandInput;
 public class BuyMerchCommand implements Command {
     private final Admin admin;
     private final CommandInput commandInput;
-    private static final ObjectMapper ObjectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
     public BuyMerchCommand(final Admin admin, final CommandInput commandInput) {
         this.admin = admin;
         this.commandInput = commandInput;
@@ -23,14 +23,14 @@ public class BuyMerchCommand implements Command {
      * @return the object node
      */
     public ObjectNode execute() {
-        ObjectNode objectNode = ObjectMapper.createObjectNode();
+        ObjectNode objectNode = objectMapper.createObjectNode();
         objectNode.put("command", commandInput.getCommand());
         objectNode.put("user", commandInput.getUsername());
         objectNode.put("timestamp", commandInput.getTimestamp());
         User user = admin.getUser(commandInput.getUsername());
         if (user != null) {
-            if (user.getCurrentPage().printCurrentPage().startsWith("Album")) {
-                ArtistPage artistPage = (ArtistPage) user.getCurrentPage();
+            if (user.getCurrentPageStrategy().printCurrentPage().startsWith("Album")) {
+                ArtistPageStrategy artistPage = (ArtistPageStrategy) user.getCurrentPageStrategy();
                 String purchasedMerch = null;
                 Integer price = null;
                 for (Merchandise merchandise : artistPage.getMerch()) {

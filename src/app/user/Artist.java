@@ -12,7 +12,7 @@ import java.util.List;
 import app.audio.Collections.Album;
 import app.audio.Collections.AlbumOutput;
 import app.audio.Files.Song;
-import app.pages.ArtistPage;
+import app.pages.ArtistPageStrategy;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -44,7 +44,7 @@ public final class Artist extends ContentCreator {
         merch = new ArrayList<>();
         events = new ArrayList<>();
 
-        super.setPage(new ArtistPage(this));
+        super.setPage(new ArtistPageStrategy(this));
     }
 
     /**

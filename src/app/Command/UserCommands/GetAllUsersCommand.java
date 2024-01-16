@@ -9,7 +9,7 @@ import java.util.List;
 public class GetAllUsersCommand implements Command {
     private final Admin admin;
     private final CommandInput commandInput;
-    private static final ObjectMapper ObjectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
     public GetAllUsersCommand(final Admin admin, final CommandInput commandInput) {
         this.admin = admin;
         this.commandInput = commandInput;
@@ -21,10 +21,10 @@ public class GetAllUsersCommand implements Command {
      */
     public ObjectNode execute() {
         List<String> users = admin.getAllUsers();
-        ObjectNode objectNode = ObjectMapper.createObjectNode();
+        ObjectNode objectNode = objectMapper.createObjectNode();
         objectNode.put("command", commandInput.getCommand());
         objectNode.put("timestamp", commandInput.getTimestamp());
-        objectNode.put("result", ObjectMapper.valueToTree(users));
+        objectNode.put("result", objectMapper.valueToTree(users));
 
         return objectNode;
     }

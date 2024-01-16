@@ -10,7 +10,7 @@ import fileio.input.CommandInput;
 public class GetNotificationsCommand implements Command {
     private final Admin admin;
     private final CommandInput commandInput;
-    private static final ObjectMapper ObjectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
     public GetNotificationsCommand(final Admin admin, final CommandInput commandInput) {
         this.admin = admin;
         this.commandInput = commandInput;
@@ -21,12 +21,12 @@ public class GetNotificationsCommand implements Command {
      * @return the object node
      */
     public ObjectNode execute() {
-        ObjectNode objectNode = ObjectMapper.createObjectNode();
+        ObjectNode objectNode = objectMapper.createObjectNode();
         objectNode.put("command", commandInput.getCommand());
         objectNode.put("user", commandInput.getUsername());
         objectNode.put("timestamp", commandInput.getTimestamp());
         User user = admin.getUser(commandInput.getUsername());
-        objectNode.put("notifications", ObjectMapper.valueToTree(user.getNotifications()));
+        objectNode.put("notifications", objectMapper.valueToTree(user.getNotifications()));
         user.getNotifications().clear();
         return objectNode;
     }

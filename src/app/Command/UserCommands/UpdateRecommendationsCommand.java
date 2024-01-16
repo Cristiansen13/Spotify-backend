@@ -21,6 +21,10 @@ public class UpdateRecommendationsCommand implements Command {
         User user = admin.getUser(commandInput.getUsername());
         if (commandInput.getRecommendationType().equals("random_song")){
             user.updateRecommendationsSong();
+        } else if (commandInput.getRecommendationType().equals("random_playlist")) {
+            user.updateRecommendationsPlaylist(commandInput.getTimestamp());
+        } else if (commandInput.getRecommendationType().equals("fans_playlist")) {
+            user.updateRecommendationsFansPlaylist(commandInput.getTimestamp());
         }
         objectNode.put("command", commandInput.getCommand());
         objectNode.put("user", commandInput.getUsername());

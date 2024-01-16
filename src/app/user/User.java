@@ -8,9 +8,9 @@ import app.audio.Collections.PlaylistOutput;
 import app.audio.Files.AudioFile;
 import app.audio.Files.Song;
 import app.audio.LibraryEntry;
-import app.pages.HomePage;
-import app.pages.LikedContentPage;
-import app.pages.Page;
+import app.pages.HomePageStrategy;
+import app.pages.LikedContentPageStrategy;
+import app.pages.PageStrategy;
 import app.player.Player;
 import app.player.PlayerStats;
 import app.searchBar.Filters;
@@ -18,6 +18,10 @@ import app.searchBar.SearchBar;
 import app.utils.Enums;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
+import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -42,15 +46,19 @@ public final class User extends UserAbstract {
     private boolean lastSearched;
     @Getter
     @Setter
-    private Page currentPage;
+    private PageStrategy currentPageStrategy;
     @Getter
     @Setter
-    private HomePage homePage;
+    private HomePageStrategy homePage;
     @Getter
     @Setter
-    private LikedContentPage likedContentPage;
+    private LikedContentPageStrategy likedContentPage;
     @Getter
     private ArrayList<String> boughtMerchandise = new ArrayList<>();
+    @Getter@Setter
+    private ArrayList<PageStrategy> pageStrategies = new ArrayList<>();
+    @Getter@Setter
+    private Integer pageIndex = -1;
     /**
      * Instantiates a new User.
      *
@@ -68,9 +76,9 @@ public final class User extends UserAbstract {
         lastSearched = false;
         status = true;
 
-        homePage = new HomePage(this);
-        currentPage = homePage;
-        likedContentPage = new LikedContentPage(this);
+        homePage = new HomePageStrategy(this);
+        currentPageStrategy = homePage;
+        likedContentPage = new LikedContentPageStrategy(this);
     }
 
     @Override
@@ -174,7 +182,7 @@ public final class User extends UserAbstract {
                 return "The selected ID is too high.";
             }
 
-            currentPage = selected.getPage();
+            currentPageStrategy = selected.getPage();
             return "Successfully selected %s's page.".formatted(selected.getUsername());
         } else {
             LibraryEntry selected = searchBar.select(itemNumber);
@@ -648,8 +656,144 @@ public final class User extends UserAbstract {
             updatedUser.getNotifications().add(objectNode);
         }
     }
-
+    /**
+     * Update recommendations song.
+     */
     public void updateRecommendationsSong() {
-        this.homePage.setRecommendedSong(this.player.getCurrentAudioFile().getName());
+        Song currentSong = (Song) this.player.getCurrentAudioFile();
+        String currentgenre = currentSong.getGenre();
+        ArrayList<Song> songs = (ArrayList<Song>) Admin.getInstance().getSongs();
+        ArrayList<Song> songsByGenre = new ArrayList<>();
+        for (Song song : songs) {
+            if (song.getGenre().equals(currentgenre)) {
+                songsByGenre.add(song);
+            }
+        }
+        int seed = this.player.getSource().getAudioFile().getDuration() - this.player.getSource().getDuration();
+        Random random = new Random(seed);
+        int randomIndex = random.nextInt(songsByGenre.size());
+        Song randomSong = songsByGenre.get(randomIndex);
+        this.homePage.setRecommendedSong(randomSong);
+        this.homePage.setLastRecommendation("song");
+    }
+    /**
+     * Update recommendations playlist.
+     *
+     * @param timestamp the timestamp
+     */
+    public void updateRecommendationsPlaylist(final int timestamp) {
+        ArrayList<String> genres = new ArrayList<>();
+        for (Song song : this.likedSongs) {
+           genres.add(song.getGenre());
+        }
+        for (Playlist playlist : this.followedPlaylists) {
+            for (Song song : playlist.getSongs()) {
+                genres.add(song.getGenre());
+            }
+        }
+        for (Playlist playlist : this.playlists) {
+            for (Song song : playlist.getSongs()) {
+                genres.add(song.getGenre());
+            }
+        }
+        Map<String, Integer> genreCountMap = new HashMap<>();
+        for (String genre : genres) {
+            genreCountMap.put(genre, genreCountMap.getOrDefault(genre, 0) + 1);
+        }
+        List<String> top3Genres = genreCountMap.entrySet()
+            .stream()
+            .sorted((entry1, entry2) -> entry2.getValue().compareTo(entry1.getValue()))
+            .limit(3)
+            .map(Map.Entry::getKey)
+            .collect(Collectors.toList());
+        ArrayList<Song> top1GenreSongs = new ArrayList<>();
+        ArrayList<Song> top2GenreSongs = new ArrayList<>();
+        ArrayList<Song> top3GenreSongs = new ArrayList<>();
+        Admin admin = Admin.getInstance();
+        for (Song song : admin.getSongs()) {
+            if (!top3Genres.isEmpty() && song.getGenre().equals(top3Genres.get(0))) {
+                top1GenreSongs.add(song);
+            } else if (top3Genres.size() > 1 && song.getGenre().equals(top3Genres.get(1))) {
+                top2GenreSongs.add(song);
+            } else if (top3Genres.size() > 2 && song.getGenre().equals(top3Genres.get(2))) {
+                top3GenreSongs.add(song);
+            }
+        }
+        top1GenreSongs.sort(Song.getLikesComparator());
+        top2GenreSongs.sort(Song.getLikesComparator());
+        top3GenreSongs.sort(Song.getLikesComparator());
+        for (int i = top1GenreSongs.size() - 1; i >= 5; i--) {
+            top1GenreSongs.remove(i);
+        }
+        for (int i = top2GenreSongs.size() - 1; i >= 3; i--) {
+            top2GenreSongs.remove(i);
+        }
+        for (int i = top3GenreSongs.size() - 1; i >= 2; i--) {
+            top3GenreSongs.remove(i);
+        }
+        Playlist playlist = new Playlist(this.getUsername() + "'s recommendations", this.getUsername(), timestamp);
+        playlist.addSongs(top1GenreSongs);
+        playlist.addSongs(top2GenreSongs);
+        playlist.addSongs(top3GenreSongs);
+        this.homePage.setRecommendedPlaylist(playlist);
+        this.homePage.setLastRecommendation("playlist");
+    }
+    /**
+     * Update recommendations fans playlist.
+     *
+     * @param timestamp the timestamp
+     */
+    public void updateRecommendationsFansPlaylist(final Integer timestamp) {
+        Admin admin = Admin.getInstance();
+        Song currentSong = (Song) this.player.getCurrentAudioFile();
+        Artist artist = admin.getArtist(currentSong.getArtist());
+        List<String> fans = artist.topFans();
+        Playlist playlist = new Playlist(artist.getUsername() + " Fan Club recommendations", this.getUsername(), timestamp);
+        for (String fan : fans) {
+            User user = admin.getUser(fan);
+            ArrayList<Song> songs = user.getLikedSongs();
+            songs.sort(Song.getLikesComparator());
+            for (int i = songs.size() - 1; i >= 5; i--) {
+                songs.remove(i);
+            }
+            playlist.addSongs(songs);
+        }
+        this.homePage.setRecommendedPlaylist(playlist);
+        this.homePage.setLastRecommendation("playlist");
+    }
+
+    /**
+     * Load recommendations.
+     */
+    public String loadRecommendations() {
+        if (!status) {
+            return "%s is offline.".formatted(getUsername());
+        }
+        if (this.homePage.getLastRecommendation() == null) {
+            return "Please select a source before loading recommendations.";
+        }
+        if (this.homePage.getLastRecommendation().equals("song")) {
+            player.setSource(this.homePage.getRecommendedSong(), this.homePage.getLastRecommendation());
+        } else if (this.homePage.getLastRecommendation().equals("playlist")){
+            player.setSource(this.homePage.getRecommendedPlaylist(), this.homePage.getLastRecommendation());
+        }
+        player.pause();
+
+        return "Playback loaded successfully.";
+    }
+
+    /**
+     * Sets premium.
+     */
+    public void setPremium(final boolean premium) {
+        this.player.setPremium(premium);
+    }
+    /**
+     * Gets premium.
+     *
+     * @return the premium
+     */
+    public boolean getPremium() {
+        return this.player.isPremium();
     }
 }

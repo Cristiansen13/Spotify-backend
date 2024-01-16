@@ -62,6 +62,13 @@ public final class Playlist extends AudioCollection {
     }
 
     /**
+     * Add songs.
+     * @param songs the songs
+     */
+    public void addSongs(final ArrayList<Song> songs) {
+        this.songs.addAll(songs);
+    }
+    /**
      * Remove song.
      *
      * @param song the song

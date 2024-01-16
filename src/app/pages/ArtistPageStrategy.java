@@ -11,7 +11,7 @@ import lombok.Getter;
 /**
  * The type Artist page.
  */
-public final class ArtistPage implements Page {
+public final class ArtistPageStrategy implements PageStrategy {
     private List<Album> albums;
     @Getter
     private List<Merchandise> merch;
@@ -24,7 +24,7 @@ public final class ArtistPage implements Page {
      *
      * @param artist the artist
      */
-    public ArtistPage(final Artist artist) {
+    public ArtistPageStrategy(final Artist artist) {
         albums = artist.getAlbums();
         merch = artist.getMerch();
         events = artist.getEvents();

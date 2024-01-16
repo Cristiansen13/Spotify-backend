@@ -1,8 +1,8 @@
 package app.Command.UserCommands;
 import app.Admin;
 import app.Command.Command;
-import app.pages.ArtistPage;
-import app.pages.HostPage;
+import app.pages.ArtistPageStrategy;
+import app.pages.HostPageStrategy;
 import app.user.Artist;
 import app.user.Host;
 import app.user.User;
@@ -13,7 +13,7 @@ import fileio.input.CommandInput;
 public class SubscribeCommand implements Command {
     private final Admin admin;
     private final CommandInput commandInput;
-    private static final ObjectMapper ObjectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
     public SubscribeCommand(final Admin admin, final CommandInput commandInput) {
         this.admin = admin;
         this.commandInput = commandInput;
@@ -24,14 +24,14 @@ public class SubscribeCommand implements Command {
      * @return the object node
      */
     public ObjectNode execute() {
-        ObjectNode objectNode = ObjectMapper.createObjectNode();
+        ObjectNode objectNode = objectMapper.createObjectNode();
         objectNode.put("command", commandInput.getCommand());
         objectNode.put("user", commandInput.getUsername());
         objectNode.put("timestamp", commandInput.getTimestamp());
         User user = admin.getUser(commandInput.getUsername());
         if (user != null) {
-            if (user.getCurrentPage().printCurrentPage().startsWith("Album")) {
-                ArtistPage artistPage = (ArtistPage) user.getCurrentPage();
+            if (user.getCurrentPageStrategy().printCurrentPage().startsWith("Album")) {
+                ArtistPageStrategy artistPage = (ArtistPageStrategy) user.getCurrentPageStrategy();
                 for (Artist artist : admin.getArtists()) {
                     if (artist.getUsername().equals(artistPage.getArtistName())) {
                         if (artist.getObservers().contains(user)) {
@@ -48,8 +48,8 @@ public class SubscribeCommand implements Command {
                         break;
                     }
                 }
-            } else if (user.getCurrentPage().printCurrentPage().startsWith("Podcast")) {
-                HostPage hostPage = (HostPage) user.getCurrentPage();
+            } else if (user.getCurrentPageStrategy().printCurrentPage().startsWith("Podcast")) {
+                HostPageStrategy hostPage = (HostPageStrategy) user.getCurrentPageStrategy();
                 for (Host host : admin.getHosts()) {
                     if (host.getUsername().equals(hostPage.getHostName())) {
                         if (host.getObservers().contains(user)) {

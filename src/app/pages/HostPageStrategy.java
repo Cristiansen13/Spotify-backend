@@ -10,7 +10,7 @@ import lombok.Getter;
 /**
  * The type Host page.
  */
-public final class HostPage implements Page {
+public final class HostPageStrategy implements PageStrategy {
     private List<Podcast> podcasts;
     private List<Announcement> announcements;
     @Getter
@@ -20,7 +20,7 @@ public final class HostPage implements Page {
      *
      * @param host the host
      */
-    public HostPage(final Host host) {
+    public HostPageStrategy(final Host host) {
         podcasts = host.getPodcasts();
         announcements = host.getAnnouncements();
         hostName = host.getUsername();

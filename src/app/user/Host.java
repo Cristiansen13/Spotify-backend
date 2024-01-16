@@ -2,7 +2,7 @@ package app.user;
 
 import app.Admin;
 import app.audio.Collections.Podcast;
-import app.pages.HostPage;
+import app.pages.HostPageStrategy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -31,7 +31,7 @@ public final class Host extends ContentCreator {
         podcasts = new ArrayList<>();
         announcements = new ArrayList<>();
 
-        super.setPage(new HostPage(this));
+        super.setPage(new HostPageStrategy(this));
     }
 
     /**

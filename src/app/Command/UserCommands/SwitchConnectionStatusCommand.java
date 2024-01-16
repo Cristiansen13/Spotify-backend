@@ -8,7 +8,7 @@ import fileio.input.CommandInput;
 public class SwitchConnectionStatusCommand implements Command {
     private final Admin admin;
     private final CommandInput commandInput;
-    private static final ObjectMapper ObjectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
     public SwitchConnectionStatusCommand(final Admin admin, final CommandInput commandInput) {
         this.admin = admin;
         this.commandInput = commandInput;
@@ -20,7 +20,7 @@ public class SwitchConnectionStatusCommand implements Command {
      */
     public ObjectNode execute() {
         String message = admin.switchStatus(commandInput.getUsername());
-        ObjectNode objectNode = ObjectMapper.createObjectNode();
+        ObjectNode objectNode = objectMapper.createObjectNode();
         objectNode.put("command", commandInput.getCommand());
         objectNode.put("user", commandInput.getUsername());
         objectNode.put("timestamp", commandInput.getTimestamp());

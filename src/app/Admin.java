@@ -324,7 +324,8 @@ public final class Admin {
     private String deleteHost(final Host host) {
         if (host.getPodcasts().stream().anyMatch(podcast -> getAudioCollectionsStream()
                 .anyMatch(collection -> collection == podcast))
-                || users.stream().anyMatch(user -> user.getCurrentPage() == host.getPage())) {
+                || users.stream().anyMatch(user -> user
+            .getCurrentPageStrategy() == host.getPage())) {
             return "%s can't be deleted.".formatted(host.getUsername());
         }
 
@@ -338,7 +339,7 @@ public final class Admin {
         if (artist.getAlbums().stream().anyMatch(album -> album.getSongs().stream()
             .anyMatch(song -> getAudioFilesStream().anyMatch(audioFile -> audioFile == song))
             || getAudioCollectionsStream().anyMatch(collection -> collection == album))
-            || users.stream().anyMatch(user -> user.getCurrentPage() == artist.getPage())) {
+            || users.stream().anyMatch(user -> user.getCurrentPageStrategy() == artist.getPage())) {
             return "%s can't be deleted.".formatted(artist.getUsername());
         }
 
@@ -721,18 +722,40 @@ public final class Admin {
         }
 
         User user = (User) currentUser;
+        user.setPageIndex(user.getPageIndex() + 1);
         if (!user.isStatus()) {
             return "%s is offline.".formatted(user.getUsername());
         }
 
         switch (nextPage) {
-            case "Home" -> user.setCurrentPage(user.getHomePage());
-            case "LikedContent" -> user.setCurrentPage(user.getLikedContentPage());
+            case "Home" -> user.setCurrentPageStrategy(user.getHomePage());
+            case "LikedContent" -> user.setCurrentPageStrategy(user.getLikedContentPage());
+            case "Artist" -> {
+                Admin admin = Admin.getInstance();
+                Song currentSong = (Song) user.getPlayer().getSource().getAudioFile();
+                for (Artist artist : admin.getArtists()) {
+                    if (artist.getUsername().equals(currentSong.getArtist())) {
+                        user.setCurrentPageStrategy(artist.getPage());
+                        break;
+                    }
+                }
+            }
+            case "Host" -> {
+                Admin admin = Admin.getInstance();
+                Podcast currentPodcast = (Podcast) user.getPlayer().getSource()
+                    .getAudioCollection();
+                for (Host host : admin.getHosts()) {
+                    if (host.getUsername().equals(currentPodcast.getOwner())) {
+                        user.setCurrentPageStrategy(host.getPage());
+                        break;
+                    }
+                }
+            }
             default -> {
                 return "%s is trying to access a non-existent page.".formatted(username);
             }
         }
-
+        user.getPageStrategies().add(user.getCurrentPageStrategy());
         return "%s accessed %s successfully.".formatted(username, nextPage);
     }
 
@@ -757,7 +780,7 @@ public final class Admin {
             return "%s is offline.".formatted(user.getUsername());
         }
 
-        return user.getCurrentPage().printCurrentPage();
+        return user.getCurrentPageStrategy().printCurrentPage();
     }
 
     /**

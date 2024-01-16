@@ -10,7 +10,7 @@ import fileio.input.CommandInput;
 public class StatusCommand implements Command {
     private final Admin admin;
     private final CommandInput commandInput;
-    private static final ObjectMapper ObjectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
     public StatusCommand(final Admin admin, final CommandInput commandInput) {
         this.admin = admin;
         this.commandInput = commandInput;
@@ -24,11 +24,11 @@ public class StatusCommand implements Command {
         User user = admin.getUser(commandInput.getUsername());
         PlayerStats stats = user.getPlayerStats();
 
-        ObjectNode objectNode = ObjectMapper.createObjectNode();
+        ObjectNode objectNode = objectMapper.createObjectNode();
         objectNode.put("command", commandInput.getCommand());
         objectNode.put("user", commandInput.getUsername());
         objectNode.put("timestamp", commandInput.getTimestamp());
-        objectNode.put("stats", ObjectMapper.valueToTree(stats));
+        objectNode.put("stats", objectMapper.valueToTree(stats));
 
         return objectNode;
     }

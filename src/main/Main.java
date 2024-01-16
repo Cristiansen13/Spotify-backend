@@ -6,6 +6,11 @@ import app.Command.HostCommands.AddAnnouncementCommand;
 import app.Command.ArtistCommands.AddEventCommand;
 import app.Command.ArtistCommands.AddMerchCommand;
 import app.Command.HostCommands.AddPodcastCommand;
+import app.Command.PlayerCommands.LoadRecommendationsCommand;
+import app.Command.UserCommands.BuyPremiumCommand;
+import app.Command.UserCommands.CancelPremiumCommand;
+import app.Command.UserCommands.NextPageCommand;
+import app.Command.UserCommands.PreviousPageCommand;
 import app.Command.UserCommands.UpdateRecommendationsCommand;
 import app.Command.UserCommands.AddRemoveInPlaylistCommand;
 import app.Command.UserCommands.AddUserCommand;
@@ -132,7 +137,6 @@ public final class Main {
         admin.setUsers(library.getUsers());
         admin.setSongs(library.getSongs());
         admin.setPodcasts(library.getPodcasts());
-        System.out.println("----------------------------------------");
         for (CommandInput command : commands) {
             admin.updateTimestamp(command.getTimestamp());
 
@@ -285,6 +289,21 @@ public final class Main {
                     commandObject = new GetNotificationsCommand(admin, command);
                 case "updateRecommendations" -> {
                     commandObject = new UpdateRecommendationsCommand(admin, command);
+                }
+                case "loadRecommendations" -> {
+                    commandObject = new LoadRecommendationsCommand(admin, command);
+                }
+                case "previousPage" -> {
+                    commandObject = new PreviousPageCommand(admin, command);
+                }
+                case "nextPage" -> {
+                    commandObject = new NextPageCommand(admin, command);
+                }
+                case "buyPremium" -> {
+                    commandObject = new BuyPremiumCommand(admin, command);
+                }
+                case "cancelPremium" -> {
+                    commandObject = new CancelPremiumCommand(admin, command);
                 }
                 default -> System.out.println("Invalid command " + commandName);
             }

@@ -9,7 +9,7 @@ import fileio.input.CommandInput;
 public class SeeMerchCommand implements Command {
     private final Admin admin;
     private final CommandInput commandInput;
-    private static final ObjectMapper ObjectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
     public SeeMerchCommand(final Admin admin, final CommandInput commandInput) {
         this.admin = admin;
         this.commandInput = commandInput;
@@ -20,13 +20,13 @@ public class SeeMerchCommand implements Command {
      * @return the object node
      */
     public ObjectNode execute() {
-        ObjectNode objectNode = ObjectMapper.createObjectNode();
+        ObjectNode objectNode = objectMapper.createObjectNode();
         objectNode.put("command", commandInput.getCommand());
         objectNode.put("user", commandInput.getUsername());
         objectNode.put("timestamp", commandInput.getTimestamp());
         User user = admin.getUser(commandInput.getUsername());
         if (user != null) {
-            objectNode.put("result", ObjectMapper
+            objectNode.put("result", objectMapper
                 .valueToTree(user.getBoughtMerchandise()));
         }
         return objectNode;

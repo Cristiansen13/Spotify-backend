@@ -1,13 +1,15 @@
 package app.user;
 
-import app.pages.Page;
+import app.pages.PageStrategy;
+import lombok.Getter;
 
 /**
  * The type Content creator.
  */
 public abstract class ContentCreator extends UserAbstract {
     private String description;
-    private Page page;
+    @Getter
+    private PageStrategy pageStrategy;
 
     /**
      * Instantiates a new Content creator.
@@ -43,16 +45,16 @@ public abstract class ContentCreator extends UserAbstract {
      *
      * @return the page
      */
-    public Page getPage() {
-        return page;
+    public PageStrategy getPage() {
+        return pageStrategy;
     }
 
     /**
      * Sets page.
      *
-     * @param page the page
+     * @param pageStrategy the page
      */
-    public void setPage(final Page page) {
-        this.page = page;
+    public void setPage(final PageStrategy pageStrategy) {
+        this.pageStrategy = pageStrategy;
     }
 }

@@ -101,7 +101,8 @@ public class WrappedCommand implements Command {
             if (getTop5(artist.getStats().getListenedAlbums()).isEmpty()
                 && getTop5(artist.getStats().getListenedSongs()).isEmpty()
                 && artist.topFans().isEmpty() && artist.getNumberOfListeners() == 0) {
-                objectNode.put("message", "No data to show for user " + artist.getUsername() + ".");
+                objectNode.put("message", "No data to show for artist "
+                    + artist.getUsername() + ".");
             } else {
                 ObjectNode topAlbums = getTop5(artist.getStats().getListenedAlbums());
                 results.put("topAlbums", objectMapper.valueToTree(topAlbums));

@@ -15,6 +15,7 @@ import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Setter;
 
 /**
  * The type Player.
@@ -32,6 +33,9 @@ public final class Player {
     private ArrayList<PodcastBookmark> bookmarks = new ArrayList<>();
     @Getter
     private ListenRecord listenRecord = new ListenRecord();
+    @Getter
+    @Setter
+    private boolean premium = false;
 
     /**
      * Instantiates a new Player.
@@ -233,6 +237,9 @@ public final class Player {
                 .getGenre());
             listenRecord.getListenedAlbums().add(((Song) source.getAudioFile())
                 .getAlbum());
+            if (premium) {
+                listenRecord.getPremiumListenedSongs().add((Song) source.getAudioFile());
+            }
             for (Artist artist : admin.getArtists()) {
                 if (artist.getUsername().equals(((Song) source.getAudioFile())
                     .getArtist())) {
